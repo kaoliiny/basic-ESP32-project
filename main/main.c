@@ -10,16 +10,18 @@
 #include "sdkconfig.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "esp_system.h"
 #include "esp_spi_flash.h"
-#include "dataQueue.h"
+#include "esp_log.h"
+#include "data_queue.h"
 
-#define TASK_STACK_SIZE (1024)
+#define TASK_STACK_SIZE 2048
 
 static xTaskHandle dataQueueUpdate_handle = NULL;
 static xTaskHandle displayData_handle = NULL;
 
-void all_tasks_shutdown(void) {
+xQueueHandle counter_queue_handle = NULL;
+
+void shutdown(void) {
 	if (dataQueueUpdate_handle) {
 		vTaskDelete(dataQueueUpdate_handle);
 		dataQueueUpdate_handle = NULL;
@@ -29,14 +31,37 @@ void all_tasks_shutdown(void) {
 		vTaskDelete(displayData_handle);
 		displayData_handle = NULL;
 	}
+
+	if (counter_queue_handle) {
+        vQueueDelete(counter_queue_handle);
+        counter_queue_handle = NULL;
+    }
 }
 
 void tasks_start_up(void) {
+	queue_ctx *q_data = {0};
+	// q_data->print_cb = &print_queue_data;
+
 	xTaskCreate(dataQueueUpdate, "put data", TASK_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, &dataQueueUpdate_handle);
 	xTaskCreate(displayQueueData, "get data", TASK_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, &displayData_handle);
 }
 
+int counter_queue_init(void) {
+	counter_queue_handle = xQueueCreate(QUEUE_SIZE, sizeof(message_t *));
+	if (counter_queue_handle == NULL) {
+		ESP_LOGE(QUEUE_TAG, "Queue init error!");
+		return -1;
+	}
+	return 0;
+}
+
 void app_main(void) {
 	printf("Hello Guys!\n");
-	tasks_start_up();
+
+	if (!counter_queue_init()) {
+		tasks_start_up();
+		while(1) {
+			vTaskDelay(500 / portTICK_PERIOD_MS);
+		}
+	}
 }
