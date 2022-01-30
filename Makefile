@@ -3,6 +3,6 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := hello_world
+PROJECT_NAME := basic-ESP32-project
 
 include $(IDF_PATH)/make/project.mk
