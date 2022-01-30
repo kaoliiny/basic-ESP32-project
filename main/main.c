@@ -32,8 +32,8 @@ void all_tasks_shutdown(void) {
 }
 
 void tasks_start_up(void) {
-	xTaskCreate(dataQueueUpdate, "update counter", TASK_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, &dataQueueUpdate_handle);
-	xTaskCreate(displayQueueData, "update counter", TASK_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, &displayData_handle);
+	xTaskCreate(dataQueueUpdate, "put data", TASK_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, &dataQueueUpdate_handle);
+	xTaskCreate(displayQueueData, "get data", TASK_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, &displayData_handle);
 }
 
 void app_main(void) {
