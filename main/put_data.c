@@ -19,6 +19,8 @@ void dataQueueUpdate(void *data) {
 		if (uxQueueSpacesAvailable(counter_queue_handle) > 0) {
 			/* Don't update counter and time_stamp when the queue is already full. */
 			msg->counter++;
+			if (msg->counter < 0)
+				msg->counter = 0;
 			msg->time_stamp = time(NULL);
 
 			/* Don't block if the queue is already full. */
