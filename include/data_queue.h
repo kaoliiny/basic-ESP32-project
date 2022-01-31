@@ -2,7 +2,7 @@
 
 typedef struct {
     int counter;
-    time_t time_stamp;
+    clock_t time_stamp;
 } __attribute__((packed)) message_t;
 
 typedef struct {
@@ -11,7 +11,7 @@ typedef struct {
 
 extern xQueueHandle counter_queue_handle;
 
-#define QUEUE_SIZE (12)
+#define QUEUE_SIZE 12
 #define QUEUE_TAG "QUEUE WARN" 
 
 void dataQueueUpdate(void *ctx);

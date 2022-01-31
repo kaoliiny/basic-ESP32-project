@@ -16,20 +16,28 @@ void print_queue_data(message_t *message) {
 	}
 
 	printf("counter value: %d\n", message->counter);
-	printf("timestamp: %s\n", ctime((const long int *)&message->time_stamp));
+	printf("time between receipts in the message queue: %ld sec\n\n", message->time_stamp / CLOCKS_PER_SEC);
 }
 
 void displayQueueData(void *data) {
 	message_t *msg_queue = NULL;
+	queue_ctx *q_data = NULL;
+	if (data) {
+		q_data = (queue_ctx *)data;
+	}
 
-	/* Nothig to receiv yet */
+	/* Nothig to receive yet */
 	vTaskDelay(DELAY_MS * 5 / portTICK_PERIOD_MS);
 
 	while (1) {
-		if (xQueueReceive(counter_queue_handle, (void *)&msg_queue, (TickType_t)0) != pdPASS) {
-			ESP_LOGW(QUEUE_TAG, "Queue receive error!");
-		} else {
-			print_queue_data(msg_queue);
+		if (uxQueueMessagesWaiting(counter_queue_handle) > 0) {
+			if (xQueueReceive(counter_queue_handle, (void *)&msg_queue, (TickType_t)0) != pdPASS) {
+				ESP_LOGW(QUEUE_TAG, "Queue receive error!");
+			} else {
+				if (q_data && q_data->print_cb) {
+					q_data->print_cb(msg_queue);
+				}
+			}
 		}
 		vTaskDelay(DELAY_MS / portTICK_PERIOD_MS);
 	}

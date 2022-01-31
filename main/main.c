@@ -18,6 +18,7 @@
 
 static xTaskHandle dataQueueUpdate_handle = NULL;
 static xTaskHandle displayData_handle = NULL;
+static queue_ctx q_data = {0}; 
 
 xQueueHandle counter_queue_handle = NULL;
 
@@ -39,11 +40,10 @@ void shutdown(void) {
 }
 
 void tasks_start_up(void) {
-	queue_ctx *q_data = {0};
-	// q_data->print_cb = &print_queue_data;
+	q_data.print_cb = print_queue_data;
 
 	xTaskCreate(dataQueueUpdate, "put data", TASK_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, &dataQueueUpdate_handle);
-	xTaskCreate(displayQueueData, "get data", TASK_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, &displayData_handle);
+	xTaskCreate(displayQueueData, "get data", TASK_STACK_SIZE, (void *)&q_data, configMAX_PRIORITIES - 3, &displayData_handle);
 }
 
 int counter_queue_init(void) {
@@ -63,5 +63,6 @@ void app_main(void) {
 		while(1) {
 			vTaskDelay(500 / portTICK_PERIOD_MS);
 		}
+		shutdown();
 	}
 }
